@@ -128,3 +128,81 @@ data.sort(function(a, b) {
 1. The getData function sets an empty array for x and y
 2. Then has a switch/case statement to figure out which dataset to use based on the users drop down choice. 
 3. It then passes the x and y arrays into the "updatePlotly" function which restyles the plot to show the dataset the user chose. 
+
+## Class 2, Activity 2
+
+#### Same concept as activity 1, just needed to create new datasets for the different options for the user and put them in the switch/case statement. 
+
+## Class 2, Activity 3
+
+#### Using d3.json to get API responses. Need the .then after the promise. 
+>A promise is an object that may produce a single value some time in >the future: either a resolved value, or a reason that it’s not >resolved (e.g., a network error occurred). A promise may be in one of >3 possible states: fulfilled, rejected, or pending. Promise users can >attach callbacks to handle the fulfilled value or the reason for >rejection.
+```
+const url = "https://api.spacexdata.com/v2/launchpads";
+
+// Fetch the JSON data and console log it
+d3.json(url).then(function(data) {
+  console.log(data);
+});
+
+// Promise Pending
+const dataPromise = d3.json(url);
+console.log("Data Promise: ", dataPromise);
+```
+
+## Class 2, Activity 4
+
+#### Using d3.json to get an API response from Quandl (stock info)
+#### We needed info such as name, stock, startDate, endDate and dates and closing prices from the response, or in this case "data". 
+#### Each attribute can be found using the object notation and by looking at the API response. 
+#### The unpack function returns an array of values given the row and index you are looking for. 
+```
+function unpack(rows, index) {
+  return rows.map(function(row) {
+    return row[index];
+  });
+}
+```
+#### In this case, dates is the first column in an array of dates. The closingPrice should be the fourth column according to the helper code, but the solved version has it as index 1. 
+```
+function buildPlot() {
+  d3.json(url).then(function(data) {
+
+    // Grab values from the data json object to build the plots
+    var name = data.dataset.name;
+    var stock = data.dataset.dataset_code;
+    var startDate = data.dataset.start_date;
+    var endDate = data.dataset.end_date;
+    var dates = unpack(data.dataset.data, 0);
+    var closingPrices = unpack(data.dataset.data, 1);
+```
+#### Then you build your plot off of this data like previous examples. 
+```
+    var trace1 = {
+      type: "scatter",
+      mode: "lines",
+      name: name,
+      x: dates,
+      y: closingPrices,
+      line: {
+        color: "#17BECF"
+      }
+    };
+
+    var data = [trace1];
+
+    var layout = {
+      title: `${stock} closing prices`,
+      xaxis: {
+        range: [startDate, endDate],
+        type: "date"
+      },
+      yaxis: {
+        autorange: true,
+        type: "linear"
+      }
+    };
+
+    Plotly.newPlot("plot", data, layout);
+```
+
